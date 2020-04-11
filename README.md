@@ -1,12 +1,12 @@
 # Asemica 
 
 This is a re-implementation of [asemica](https://github.com/linenoise/asemica) which is a cipher that uses a document as a key.
-The original is written in Perl and this one uses the [Factor Programming Language](https://factorcode.org/).
+The original is written in Perl but this one uses the [Factor](https://factorcode.org/) programming anguage.
 
 ## Usage
 
 To use this program you need to first have Factor installed on your
-system. Clone the repository and change into the directory. The you can run it through invoking the factor-vm with `asemica.factor` and all the
+system. Clone the repository and change into the directory. Then you can run it by invoking the factor-vm with `asemica.factor` and all the
 necessary arguments for example on Arch Linux.
 
 ```
@@ -23,14 +23,15 @@ $ factor-vm asemica.factor -m dec -c https://www.gutenberg.org/cache/epub/5200/p
 Attack at Dawn
 ```
 
-The above encodes the message from stdin "Attack at Dawn" and prints out
-the result on `STDOUT`. A file can be passed for the input and output
+The above encodes the message from stdin "Attack at Dawn" and writes
+the result to `enc.txt`. A file can be passed for the input and output
 using `-i` and `-o`. Additionally the key file (`-c` argument) may be
-a URL to an online file which.
+a URL to an online file.
 
 ## Practical Information
 
-The program takes some time to start-up so it may be beneficial to
+The program takes some time to start-up due to the loading of the various
+libraries being used so it may be beneficial to
 generate a custom image containing all the loaded libraries and
 passing it as an argument. To do this run the following commands
 
@@ -45,7 +46,7 @@ IN: scratchpad "/some/path/cust.img" save-image-and-exit
 
 Afterwards make sure to add `-i=/some/path/cust.img` to calls to the
 factor vm. Alternatively you can add a shebang line to the top of 
-`asemica.factor` so you can run the program as a script. Running asemica
+`asemica.factor` so you can run the program as a script. Running
 without any arguments prints out the usage.
 
 ```
