@@ -6,12 +6,13 @@ splitting strings system vectors wrap.strings ;
 IN: asemica 
 
 TUPLE: transition
-{ token      string }
-{ seen       integer }
-{ door       vector }
-{ doors      integer }
-{ exits      sequence }
-meaningful ;
+{ token      string }  ! Raw string that appeared
+{ seen       integer } ! how many times token has been seen
+{ door       vector }  ! words after this one in document key
+{ doors      integer } ! length of door vector
+{ exits      assoc }   ! words after plus occur count
+meaningful             ! true or false depending if doors > 15
+;
 
 : <transition> ( -- transition )
     transition new
@@ -26,7 +27,7 @@ meaningful ;
     key assoc at
     [ drop val key assoc set-at assoc ]
     [ assoc { key val } suffix ]
-    if* ; inline
+    if* ;
 
 :: add-or-increment ( key assoc -- assoc ) 
     key assoc at 
@@ -86,7 +87,7 @@ meaningful ;
 : new-or-existing ( key assoc -- obj )
     at [
         <transition>
-    ] unless* ; inline
+    ] unless* ;
 
 : set-meaningful ( assoc -- newassoc )
     [ dup doors>> 15 > [ t >>meaningful ] when ]
@@ -95,22 +96,22 @@ meaningful ;
 : update-transition-info ( value transition -- transition )
     2dup exits>> add-or-increment >>exits 
     dup [ door>> ?adjoin ] dip swap [ [ 1 + ] change-doors ]
-    when [ 1 + ] change-seen ; 
+    when [ 1 + ] change-seen ;
 
-:: generate-transitions ( a b -- matrix )
-    { } >alist :> tmatrix! ! create transition matrix
+:: generate-transitions ( a b -- table )
+    { } >alist :> ttable! ! create transition table
     a b ! tokens
     [
         :> value
         :> key
         ! get transition tuple if it exists or make new one
-        key >lower tmatrix new-or-existing
+        key >lower ttable new-or-existing
         key >>token
         ! update with information
         value swap update-transition-info
-        ! modify the transition matrix
-        key >lower tmatrix assoc-add tmatrix!
-    ] 2each tmatrix set-meaningful ; 
+        ! modify the transition table
+        key >lower ttable assoc-add ttable!
+    ] 2each ttable set-meaningful ;
 
 : tokenize-corpus ( filename -- a b )
     utf8 file-contents 2tokens ;
@@ -152,15 +153,6 @@ meaningful ;
             elt [ idx make-nibble decoded swap append decoded! ] when
         ] when
     ] each decoded pack ;
-
-:: quot-test ( str -- )
-    1 :> n!
-    str 2tokens [
-        :> v
-        :> k
-        k v n "%s %s %d\n" printf
-        n 5 < [ n 1 + n! ] when
-    ] 2each ;
 
 
 : print-usage ( -- ) [[
@@ -208,7 +200,7 @@ Options:
         [
             "corp.txt" temp-file dup [ download-to ] dip
         ]
-        [ ] if make-relative utf8 <file-reader> stream-contents
+        when make-relative utf8 <file-reader> stream-contents
     ]
     [
        contents ! read input from stdin
